@@ -21,7 +21,9 @@ def main():
     print("✅ Authenticated with Hugging Face")
     
     # Load dataset from unified Hugging Face repository
-    dataset = load_dataset(DATASET_REPO, name="raw_data")
+    #tourism_project/data/tourism.csv
+    #dataset = load_dataset("your-username/tourism-mlops-project", data_files="data/raw/tourism_raw.csv")
+    dataset = load_dataset(DATASET_REPO, name="tourism_project/data/tourism.csv")
     df = dataset['train'].to_pandas()
     print(f"📊 Dataset loaded from: {DATASET_REPO}")
     
