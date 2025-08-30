@@ -13,6 +13,7 @@ def main():
     
     # Authenticate with Hugging Face using token from environment
     token = os.environ.get('HF_TOKEN')
+    #test
     if not token:
         raise ValueError("HF_TOKEN environment variable not set")
     
