@@ -20,13 +20,20 @@ def main():
     print("✅ Authenticated with Hugging Face")
     
     # Load the tourism dataset
-    tourism_data = pd.read_csv('tourism_project/data/tourism.csv')
+    #new code 
+    data_path = 'tourism_project/data/tourism.csv' # Corrected path
+    print(f"Attempting to read data from: {data_path}")
+
+    # Load the tourism dataset
+    tourism_data = pd.read_csv(data_path)
     print(f"📊 Dataset loaded: {tourism_data.shape}")
-    
+
     # Register dataset on unified repository
     dataset = Dataset.from_pandas(tourism_data)
     dataset.push_to_hub(DATASET_REPO, config_name="raw_data")
     print(f"✅ Dataset registered successfully on: {DATASET_REPO}")
+    #end 
+    
 
 if __name__ == "__main__":
     main()
