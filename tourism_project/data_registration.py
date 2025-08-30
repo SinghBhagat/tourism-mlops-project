@@ -20,7 +20,7 @@ def main():
     print("✅ Authenticated with Hugging Face")
     
     # Load the tourism dataset
-    tourism_data = pd.read_csv('data/tourism.csv')
+    tourism_data = pd.read_csv('tourism_project/data/tourism.csv')
     print(f"📊 Dataset loaded: {tourism_data.shape}")
     
     # Register dataset on unified repository
