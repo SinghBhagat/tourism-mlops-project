@@ -7,10 +7,7 @@ from huggingface_hub import hf_hub_download
 import os
 import sys # Import sys for potential logging
 
-# Add this line at the very top, after imports
-print("--- app.py script started processing ---")
-print(f"Python version: {sys.version}") # Log Python version
-print(f"Streamlit version: {st.__version__}") # Log Streamlit version
+
 
 # Project Configuration (Ensure these match your notebook configuration)
 HF_USERNAME = "bhagat26singh" # 👈 REPLACE with your actual Hugging Face username
@@ -26,75 +23,58 @@ st.set_page_config(
 @st.cache_resource
 def load_model_and_encoders():
     """Load the trained model and label encoders"""
-    st.write("Attempting to load model and encoders...") # Added log
-    print("Attempting to load model and encoders (print)...") # Added print log
+   
 
     try:
-        # Load from Hugging Face Hub using unified repository structure
-        st.write(f"Attempting hf_hub_download from repo: {MODEL_REPO}") # Added log
-        print(f"Attempting hf_hub_download from repo (print): {MODEL_REPO}") # Added print log
+       
 
         model_path = hf_hub_download(
             repo_id=MODEL_REPO,
             filename="models/best_model.pkl",
             repo_type="model"
         )
-        st.write(f"Model file downloaded to: {model_path}") # Added log
-        print(f"Model file downloaded to (print): {model_path}") # Added print log
+       
 
         encoders_path = hf_hub_download(
             repo_id=MODEL_REPO,
             filename="preprocessing/label_encoders.pkl",
             repo_type="model"
         )
-        st.write(f"Encoders file downloaded to: {encoders_path}") # Added log
-        print(f"Encoders file downloaded to (print): {encoders_path}") # Added print log
+        
 
 
         model = joblib.load(model_path)
-        st.write("Model loaded successfully.") # Added log
-        print("Model loaded successfully (print).") # Added print log
+       
 
         label_encoders = joblib.load(encoders_path)
-        st.write("Label encoders loaded successfully.") # Added log
-        print("Label encoders loaded successfully (print).") # Added print log
+      
 
 
         return model, label_encoders
     except Exception as e:
-        st.error(f"Error loading model from Hugging Face Hub: {e}") # Modified log
-        print(f"Error loading model from Hugging Face Hub (print): {e}") # Added print log
-        st.info("Fallback: Trying to load from local files...")
-        print("Fallback: Trying to load from local files (print)...") # Added print log
+       
         try:
             # Fallback to local files - these are copied by the Dockerfile
             local_model_path = "/app/models/best_model.pkl" # Adjusted path assumption
             local_encoders_path = "/app/preprocessing/label_encoders.pkl" # Adjusted path assumption
 
-            st.write(f"Attempting to load from local path: {local_model_path}") # Added log
-            print(f"Attempting to load from local path (print): {local_model_path}") # Added print log
+           
             model = joblib.load(local_model_path)
-            st.write("Model loaded successfully from local path.") # Added log
-            print("Model loaded successfully from local path (print).") # Added print log
+           
 
 
-            st.write(f"Attempting to load encoders from local path: {local_encoders_path}") # Added log
-            print(f"Attempting to load encoders from local path (print): {local_encoders_path}") # Added print log
+          
             label_encoders = joblib.load(local_encoders_path)
-            st.write("Label encoders loaded successfully from local path.") # Added log
-            print("Label encoders loaded successfully from local path (print).") # Added print log
+            
 
 
             return model, label_encoders
         except Exception as local_error:
-            st.error(f"Error loading local model: {local_error}") # Modified log
-            print(f"Error loading local model (print): {local_error}") # Added print log
+           
             return None, None
 
 def main():
-    st.write("--- App Started ---") # Added log at the beginning of main
-    print("--- App Started (print) ---") # Added print log at the beginning of main
-    st.title("Tourism Package Prediction")
+   
     st.markdown("Predict whether a customer will purchase the Wellness Tourism Package")
 
     # Load model and encoders
@@ -112,7 +92,7 @@ def main():
     # Create input form
     st.header("Enter Customer Information")
     st.write("--- Creating input form ---") # Added log before form
-    print("--- Creating input form (print) ---") # Added print log before form
+   
 
 
     col1, col2, col3 = st.columns(3)
