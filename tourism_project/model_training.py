@@ -1,17 +1,18 @@
+import os 
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier 
 from xgboost import XGBClassifier 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score 
-from datasets import load_dataset 
-from huggingface_hub import login, HfApi
+
+from huggingface_hub import login, hf_hub_download, HfApi 
 import joblib
 import mlflow
 import mlflow.sklearn
 import mlflow.xgboost 
-import json 
+import json
 import warnings 
 import time 
-import os
+
 warnings.filterwarnings('ignore')
 
 def main():
@@ -21,7 +22,7 @@ def main():
     DATASET_REPO = f"{HF_USERNAME}/{PROJECT_NAME}"
     MODEL_REPO = f"{HF_USERNAME}/{PROJECT_NAME}-model"
 
-    # Authenticate with Hugging Face using token from environment
+   
     token = os.environ.get('HF_TOKEN')
     if not token:
         raise ValueError("HF_TOKEN environment variable not set")
@@ -29,19 +30,39 @@ def main():
     login(token=token)
     print("✅ Authenticated with Hugging Face")
 
-    # Load datasets from processed CSV files
-    # --- Modified Data Loading ---
-    train_df_path = 'tourism_project/data/processed/train_data.csv'
-    test_df_path = 'tourism_project/data/processed/test_data.csv'
-    print(f"Attempting to load processed data from: {train_df_path}, {test_df_path}")
+   
+    train_data_path_in_repo = "data/processed/train_data.csv"
+    test_data_path_in_repo = "data/processed/test_data.csv"
+
+    print(f"Attempting to download processed data from {DATASET_REPO}/{train_data_path_in_repo} and {DATASET_REPO}/{test_data_path_in_repo}")
     try:
-        # Ensure index is not loaded as a column
-        train_df = pd.read_csv(train_df_path, index_col=False)
-        test_df = pd.read_csv(test_df_path, index_col=False)
-        print("✅ Processed data loaded from CSVs")
+        # Download train data CSV
+        train_csv_path = hf_hub_download(
+            repo_id=DATASET_REPO,
+            filename=train_data_path_in_repo,
+            repo_type="dataset"
+        )
+        print(f"✅ Processed train data downloaded to: {train_csv_path}")
+
+        # Download test data CSV
+        test_csv_path = hf_hub_download(
+            repo_id=DATASET_REPO,
+            filename=test_data_path_in_repo,
+            repo_type="dataset"
+        )
+        print(f"✅ Processed test data downloaded to: {test_csv_path}")
+
+
+       
+        train_df = pd.read_csv(train_csv_path, index_col=False)
+        test_df = pd.read_csv(test_csv_path, index_col=False)
+        print("✅ Processed data loaded into pandas DataFrames")
+
     except Exception as e:
-        print(f"❌ Error loading processed data from CSVs: {e}")
-        print("Please ensure the 'data/processed/train_data.csv' and 'data/processed/test_data.csv' files exist in your GitHub repository.")
+        print(f"❌ Error downloading or loading processed CSVs from Hugging Face Hub: {e}")
+        print("Please ensure:")
+        print(f"- The files '{train_data_path_in_repo}' and '{test_data_path_in_repo}' exist in your dataset repository '{DATASET_REPO}' on Hugging Face.")
+        print("- Your HF_TOKEN has read permissions for the dataset repository.")
         raise # Re-raise the exception to fail the job
 
 
@@ -52,14 +73,11 @@ def main():
 
     print(f"📊 Training data shape: {X_train.shape}")
     print(f"📊 Test data shape: {X_test.shape}")
-    print(f"Training features: {X_train.columns.tolist()}") # Print feature names to verify
-    print(f"Testing features: {X_test.columns.tolist()}") # Print feature names to verify
+    print(f"Training features: {X_train.columns.tolist()}") 
+    print(f"Testing features: {X_test.columns.tolist()}") 
 
 
-    # Model training (using XGBoost as in notebook outputs)
-    # Ensure MLflow tracking is enabled
-    # MLflow tracking URI should be set in the GitHub Actions workflow or environment
-    # mlflow.set_tracking_uri("http://localhost:5000") # Remove or comment out if set externally
+   
 
     with mlflow.start_run(run_name="XGBoost Model Training"): # Give run a name
         print("Starting MLflow run...")
@@ -68,12 +86,12 @@ def main():
         # Use the parameters from your best model in the notebook (XGBoost)
         model = XGBClassifier(
             objective='binary:logistic',
-            eval_metric='logloss', # Use eval_metric from notebook outputs
-            use_label_encoder=False, # Recommended for XGBoost with recent versions
-            n_estimators=100, # Example parameter, use best from notebook
-            learning_rate=0.1, # Example parameter, use best from notebook
-            random_state=42 # Use random_state for reproducibility
-            # Add other best parameters from notebook if available
+            eval_metric='logloss', 
+            use_label_encoder=False, 
+            n_estimators=100, 
+            learning_rate=0.1, 
+            random_state=42 
+           
         )
         print(f"Training model: {type(model).__name__}")
         start_time = time.time()
@@ -130,11 +148,21 @@ def main():
         joblib.dump(model, model_filename)
         # Need to load label_encoders from the data_preparation step's output
         try:
-            label_encoders = joblib.load('label_encoders.pkl') # Assuming this file is available from data_preparation
+            # Download label encoders from Hugging Face Model Hub for saving locally
+            label_encoders_path_in_repo = 'preprocessing/label_encoders.pkl'
+            print(f"Attempting to download label encoders from {MODEL_REPO}/{label_encoders_path_in_repo}")
+            downloaded_encoders_path = hf_hub_download(
+                 repo_id=MODEL_REPO,
+                 filename=label_encoders_path_in_repo,
+                 repo_type="model" # Encoders were uploaded to Model Hub
+            )
+            print(f"✅ Label encoders downloaded to: {downloaded_encoders_path}")
+
+            label_encoders = joblib.load(downloaded_encoders_path) # Load downloaded encoders
             joblib.dump(label_encoders, 'label_encoders.pkl') # Save it again locally
             print("✅ Label encoders saved locally: label_encoders.pkl")
-        except FileNotFoundError:
-            print("❌ Warning: label_encoders.pkl not found. Skipping local save/upload of encoders.")
+        except Exception as e: # Catching broader exception for download/load errors
+            print(f"❌ Warning: Error downloading or loading label encoders: {e}. Skipping local save/upload of encoders.")
             label_encoders = None # Set to None if not found
 
         print(f"✅ Model saved locally: {model_filename}")
@@ -195,7 +223,7 @@ def main():
             repo_id=MODEL_REPO,
             repo_type="model"
         )
-        print(f"✅ Model metadata uploaded to: {MODEL_REPO}/metadata/model_metadata.json")
+        print("✅ Model metadata uploaded to: {MODEL_REPO}/metadata/model_metadata.json")
 
 
     except Exception as e:
