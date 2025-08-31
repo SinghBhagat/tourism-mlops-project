@@ -89,7 +89,7 @@ jobs:
           python tourism_project/model_training.py
       
       - name: Upload MLflow Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mlflow-artifacts
           path: mlruns/
