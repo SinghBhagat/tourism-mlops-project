@@ -1,5 +1,3 @@
-# Model training script
-%%writefile tourism_project/model_training.py
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier 
 from xgboost import XGBClassifier 
