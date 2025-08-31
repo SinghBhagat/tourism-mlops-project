@@ -84,9 +84,7 @@ def main():
         st.error("Model could not be loaded. Please check the logs for details.") # Modified message
         return
 
-    st.success("Model and encoders loaded successfully! App is ready.") # Added success message
-    st.write("--- Model and encoders loaded ---") # Added log after loading
-    print("--- Model and encoders loaded (print) ---") # Added print log after loading
+   
 
 
     # Create input form
@@ -122,8 +120,7 @@ def main():
         monthly_income = st.number_input("Monthly Income", min_value=10000, max_value=1000000, value=50000)
 
     if st.button("Predict Package Purchase", type="primary"):
-        st.write("--- Predict button clicked ---") # Added log on button click
-        print("--- Predict button clicked (print) ---") # Added print log on button click
+      
         try:
             # Prepare input data
             input_data = {
@@ -149,8 +146,7 @@ def main():
 
             # Create DataFrame
             input_df = pd.DataFrame([input_data])
-            st.write("--- Input DataFrame created ---") # Added log after df creation
-            print("--- Input DataFrame created (print) ---") # Added print log after df creation
+           
 
 
             # Apply label encoding
@@ -159,28 +155,22 @@ def main():
                 if col in label_encoders:
                     try:
                         input_df[col] = label_encoders[col].transform(input_df[col])
-                        st.write(f"--- Encoded column: {col} ---") # Added log for each encoded column
-                        print(f"--- Encoded column (print): {col} ---") # Added print log for each encoded column
+                       
                     except ValueError:
                         st.error(f"Unknown category in {col}: {input_data[col]}")
-                        st.write(f"--- Error encoding column: {col} ---") # Added log for encoding error
-                        print(f"--- Error encoding column (print): {col} ---") # Added print log for encoding error
+                      
                         return
 
 
-            # Make prediction
-            st.write("--- Making prediction ---") # Added log before prediction
-            print("--- Making prediction (print) ---") # Added print log before prediction
+           
             prediction = model.predict(input_df)[0]
             prediction_proba = model.predict_proba(input_df)[0]
-            st.write("--- Prediction made ---") # Added log after prediction
-            print("--- Prediction made (print) ---") # Added print log after prediction
+            
 
 
             # Display results
             st.header("Prediction Results")
-            st.write("--- Displaying results ---") # Added log before displaying results
-            print("--- Displaying results (print) ---") # Added print log before displaying results
+           
 
 
             col1, col2 = st.columns(2)
