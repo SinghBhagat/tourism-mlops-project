@@ -7,4 +7,4 @@ scipy==1.16.1
 xgboost==3.0.4 
 datasets==4.0.0
 huggingface_hub==0.34.4 
-mlflow==3.3.2 
+mlflow==3.3.2
