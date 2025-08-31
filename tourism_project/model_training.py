@@ -144,7 +144,7 @@ def main():
 
         # Save model and encoders locally for potential upload outside MLflow
         print("Saving model and encoders locally...")
-        model_filename = f"best_model_{type(model).__name__.lower()}.pkl"
+        model_filename = f"best_model.pkl"
         joblib.dump(model, model_filename)
         # Need to load label_encoders from the data_preparation step's output
         try:
